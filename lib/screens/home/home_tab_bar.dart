@@ -22,7 +22,9 @@ class _HomeTabBarState extends State<HomeTabBar> {
             BottomNavigationBarItem(
                 icon: Icon(Icons.account_balance_wallet), label: 'Cuentas'),
             BottomNavigationBarItem(
-                icon: Icon(Icons.send), label: 'Transacciones')
+                icon: Icon(Icons.send), label: 'Transacciones'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.settings), label: 'Ajustes'),
           ]),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

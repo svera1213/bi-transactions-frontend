@@ -1,7 +1,6 @@
 import 'package:bi_transactions_frontend/models/account.dart';
 import 'package:bi_transactions_frontend/repositories/account_repo.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class AccountsList extends StatefulWidget {
