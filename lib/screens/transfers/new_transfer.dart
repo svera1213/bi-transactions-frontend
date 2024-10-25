@@ -1,11 +1,21 @@
 import 'package:bi_transactions_frontend/models/account.dart';
 import 'package:bi_transactions_frontend/repositories/account_repo.dart';
+import 'package:bi_transactions_frontend/repositories/tranfers_repo.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class NewTransferWidget extends StatefulWidget {
-  const NewTransferWidget({super.key, required this.accountsRepo});
+  const NewTransferWidget(
+      {super.key,
+      required this.accountRepository,
+      required this.transferRepository,
+      required this.accountId});
 
-  final AccountRepositoryProtocol accountsRepo;
+  final AccountRepositoryProtocol accountRepository;
+
+  final TransferRepositoryProtocol transferRepository;
+
+  final int accountId;
 
   @override
   State<StatefulWidget> createState() => _NewTransferWidgetState();
@@ -15,21 +25,51 @@ class _NewTransferWidgetState extends State<NewTransferWidget> {
   final _formKey = GlobalKey<FormState>();
   List<Account> accounts = [];
 
-  bool isLoading = true;
-  String fromAccountNumber = '';
+  bool isLoading = false;
+
+  double amount = 0;
+
+  Account? toAccount;
 
   @override
   void initState() {
     super.initState();
-    widget.accountsRepo
-        .fetchAccounts()
-        .then((value) => accounts = value)
-        .whenComplete(() {
+    widget.accountRepository.fetchAccounts().then((value) {
+      var aux = value
+          .where(
+            (element) => element.id != widget.accountId,
+          )
+          .toList();
+      setState(() {
+        accounts = aux;
+      });
+    }).whenComplete(() {
       setState(() {
         isLoading = false;
-        // fromAccountNumber = accounts.first.accountNumber;
+        toAccount = accounts.first;
       });
     });
+  }
+
+  void onSubmit() async {
+    if (!_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Por favor complete todos los campos')));
+      return;
+    }
+    _formKey.currentState?.save();
+
+    setState(() {
+      isLoading = true;
+    });
+
+    await widget.transferRepository
+        .newTransfer(widget.accountId, toAccount!.id, amount);
+    onPop();
+  }
+
+  void onPop() {
+    GoRouter.of(context).pop();
   }
 
   Widget getFormWidget() {
@@ -38,42 +78,32 @@ class _NewTransferWidgetState extends State<NewTransferWidget> {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            const Text('Cuenta de origen'),
+            const Text('Cuenta destino'),
             const SizedBox(
               height: 5,
             ),
-            // DropdownButton<String>(
-            //     value: fromAccountNumber,
-            //     items: accounts.map<DropdownMenuItem<String>>((account) {
-            //       return DropdownMenuItem<String>(
-            //         value: account.accountNumber,
-            //         child: Text('${account.accountNumber} - ${account.name}'),
-            //       );
-            //     }).toList(),
-            //     onChanged: (value) {
-            //       setState(() {
-            //         fromAccountNumber = value ?? '';
-            //       });
-            //     }),
+            DropdownButton<Account>(
+                value: toAccount,
+                items: accounts.map<DropdownMenuItem<Account>>((account) {
+                  return DropdownMenuItem<Account>(
+                    value: account,
+                    child: Text(account.accountName),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    toAccount = value;
+                  });
+                }),
             const SizedBox(
               height: 20,
             ),
             TextFormField(
-              decoration:
-                  const InputDecoration(labelText: 'Número de cuenta destino'),
-              keyboardType: TextInputType.number,
-              textInputAction: TextInputAction.next,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Por favor ingrese el número de la cuenta';
-                }
-                return null;
+              onSaved: (newValue) {
+                setState(() {
+                  amount = double.parse(newValue ?? '0');
+                });
               },
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            TextFormField(
               decoration: const InputDecoration(labelText: 'Valor a enviar'),
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
@@ -89,7 +119,7 @@ class _NewTransferWidgetState extends State<NewTransferWidget> {
               height: 40,
             ),
             ElevatedButton(
-                onPressed: () {}, child: const Text('Enviar transferencia')),
+                onPressed: onSubmit, child: const Text('Enviar transferencia')),
           ],
         ),
       ),

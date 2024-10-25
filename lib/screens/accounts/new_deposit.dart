@@ -31,7 +31,6 @@ class _NewDepositPageState extends State<NewDepositPage> {
     setState(() {
       isLoading = true;
     });
-    print('---> ${widget.accountId}');
     await widget.accountsRepo
         .depositToAccount(int.parse(widget.accountId), deposit);
     onPop();

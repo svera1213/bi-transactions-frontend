@@ -11,6 +11,7 @@ import 'package:bi_transactions_frontend/screens/login/sign_up_screen.dart';
 import 'package:bi_transactions_frontend/screens/settings/settings.dart';
 import 'package:bi_transactions_frontend/screens/transfers/new_transfer.dart';
 import 'package:bi_transactions_frontend/screens/transfers/transfer_list.dart';
+import 'package:bi_transactions_frontend/screens/transfers/transfers_list.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -73,15 +74,31 @@ final GoRouter mainRouter =
           GoRoute(
               path: '/tranfers',
               builder: (context, state) =>
-                  TransferList(transferRepo: TransferMockRepository()),
+                  TransferList(accountsRepo: AccountRepository()),
               routes: <RouteBase>[
                 GoRoute(
-                  path: 'new_transfer',
-                  parentNavigatorKey: _rootNavigatorKey,
-                  builder: (context, state) => NewTransferWidget(
-                    accountsRepo: AccountRepository(),
-                  ),
-                )
+                    path: '/list_transfers/:id',
+                    name: 'list_transfers',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (context, state) {
+                      final id = state.pathParameters['id'] ?? '';
+                      return TransfersList(
+                        transferRepository: TransferRepository(),
+                        accountId: int.parse(id),
+                      );
+                    }),
+                GoRoute(
+                    path: '/new_transfer/:id',
+                    name: 'new_transfer',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (context, state) {
+                      final id = state.pathParameters['id'] ?? '';
+                      return NewTransferWidget(
+                        accountRepository: AccountRepository(),
+                        transferRepository: TransferRepository(),
+                        accountId: int.parse(id),
+                      );
+                    })
               ])
         ]),
         StatefulShellBranch(routes: <RouteBase>[

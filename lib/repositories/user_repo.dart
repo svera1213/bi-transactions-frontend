@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 abstract class UserRepositoryProtocol {
   Future<bool> login(LoginAccount account);
   Future<bool> signUp(SignUpCredentials credentials);
-  Future<void> getUserNationalId(String email);
+  Future<bool> getUserNationalId(String email);
 }
 
 class UserRepository extends UserRepositoryProtocol {
@@ -47,7 +47,7 @@ class UserRepository extends UserRepositoryProtocol {
   }
 
   @override
-  Future<void> getUserNationalId(String email) async {
+  Future<bool> getUserNationalId(String email) async {
     var key = await SecureStore.instance.getToken();
     final response = await http.get(
       Uri.parse('http://0.0.0.0:8080/api/users/email/$email'),
@@ -67,6 +67,7 @@ class UserRepository extends UserRepositoryProtocol {
         _ => throw const FormatException('Failed to load album.'),
       };
       await SecureStore.instance.storeUserId(nationalId);
+      return true;
     } else {
       throw Exception('No se pudo obtener el id del usuario');
     }

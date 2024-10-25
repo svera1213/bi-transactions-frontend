@@ -1,19 +1,60 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:bi_transactions_frontend/models/transfer.dart';
+import 'package:bi_transactions_frontend/repositories/secure_store.dart';
+import 'package:http/http.dart' as http;
 
 abstract class TransferRepositoryProtocol {
-  Future<List<Transfer>> fetchTransfers();
+  Future<List<Transfer>> fetchTransfers(int accountId);
+  Future<bool> newTransfer(int origin, int destiny, double amount);
 }
 
-class TransferMockRepository extends TransferRepositoryProtocol {
+class TransferRepository extends TransferRepositoryProtocol {
   @override
-  Future<List<Transfer>> fetchTransfers() async {
-    await Future.delayed(const Duration(microseconds: 2000));
-    return <Transfer>[
-      Transfer('12345', '9456349', 12.3, DateTime.utc(2024, 10, 23, 10, 40, 0)),
-      Transfer('93846', '23414', 400, DateTime.utc(2024, 10, 18, 15, 05, 0)),
-      Transfer('84920', '12345', 23.76, DateTime.utc(2024, 10, 22, 22, 40, 0)),
-      Transfer('12345', '64590', 1989.6, DateTime.utc(2024, 10, 15, 10, 04, 0)),
-      Transfer('93846', '93846', 2.3, DateTime.utc(2024, 10, 24, 08, 33, 0)),
-    ];
+  Future<List<Transfer>> fetchTransfers(int accountId) async {
+    var key = await SecureStore.instance.getToken();
+    final response = await http.get(
+      Uri.parse('http://0.0.0.0:8080/api/accounts/transactions'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        HttpHeaders.authorizationHeader: 'Bearer $key'
+      },
+    );
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body) as List<dynamic>;
+      return json
+          .map(
+              (transfer) => Transfer.fromJson(transfer as Map<String, dynamic>))
+          .toList()
+          .where(
+            (transfer) => transfer.originAccount.id == accountId,
+          )
+          .toList();
+    } else {
+      throw Exception('No se pudieron cargar las transacciones');
+    }
+  }
+
+  @override
+  Future<bool> newTransfer(int origin, int destiny, double amount) async {
+    var key = await SecureStore.instance.getToken();
+    final response = await http.post(
+        Uri.parse('http://0.0.0.0:8080/api/accounts/transactions/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          HttpHeaders.authorizationHeader: 'Bearer $key'
+        },
+        body: jsonEncode(<String, dynamic>{
+          'originAccountId': origin,
+          'destinationAccountId': destiny,
+          'amount': amount,
+        }));
+
+    if (response.statusCode == 201) {
+      return true;
+    } else {
+      throw Exception('No se pudieron cargar las transacciones');
+    }
   }
 }

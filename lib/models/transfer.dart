@@ -1,9 +1,14 @@
+import 'package:bi_transactions_frontend/models/account.dart';
+
 class Transfer {
-  final String fromAccountNumber;
-  final String toAccountNumber;
-  final DateTime timestamp;
+  final Account originAccount;
+  final Account destinationAccount;
   final double amount;
 
-  Transfer(this.fromAccountNumber, this.toAccountNumber, this.amount,
-      this.timestamp);
+  Transfer(this.originAccount, this.destinationAccount, this.amount);
+
+  factory Transfer.fromJson(Map<String, dynamic> json) {
+    return Transfer(Account.fromJson(json['originAccount']),
+        Account.fromJson(json['destinationAccount']), json['amount']);
+  }
 }

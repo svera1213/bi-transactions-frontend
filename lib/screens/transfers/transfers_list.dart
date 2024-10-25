@@ -1,50 +1,45 @@
-import 'package:bi_transactions_frontend/models/account.dart';
-import 'package:bi_transactions_frontend/repositories/account_repo.dart';
+import 'package:bi_transactions_frontend/models/transfer.dart';
+import 'package:bi_transactions_frontend/repositories/tranfers_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-class TransferList extends StatefulWidget {
-  const TransferList({super.key, required this.accountsRepo});
+class TransfersList extends StatefulWidget {
+  const TransfersList(
+      {super.key, required this.transferRepository, required this.accountId});
 
-  final AccountRepositoryProtocol accountsRepo;
+  final TransferRepositoryProtocol transferRepository;
+
+  final int accountId;
 
   @override
-  State<StatefulWidget> createState() => _TransferListState();
+  State<StatefulWidget> createState() => _TransfersListState();
 }
 
-class _TransferListState extends State<TransferList> {
+class _TransfersListState extends State<TransfersList> {
   final currencyFormat = NumberFormat.currency(locale: 'en_US', symbol: '\$');
 
   bool isLoading = false;
 
-  Future<List<Account>> getAccounts() {
-    return widget.accountsRepo.fetchAccounts();
+  Future<List<Transfer>> getTransfers() {
+    return widget.transferRepository.fetchTransfers(widget.accountId);
   }
 
-  Widget getListView(List<Account> accounts) {
+  Widget getListView(List<Transfer> tranfers) {
     return ListView.separated(
       padding: const EdgeInsets.all(10),
-      itemCount: accounts.length,
+      itemCount: tranfers.length,
       itemBuilder: (context, index) {
-        var account = accounts[index];
-        var amount = currencyFormat.format(account.balance);
+        var tranfer = tranfers[index];
+        var amount = currencyFormat.format(tranfer.amount);
         return ListTile(
-          title: Text(account.accountName),
+          title: Text(tranfer.originAccount.accountName),
+          subtitle: Text('Para: ${tranfer.destinationAccount.accountName}'),
           trailing: Text(amount),
           tileColor: Colors.blueGrey[300],
           leadingAndTrailingTextStyle:
               const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
-          onTap: () {
-            if (accounts[index].balance > 0) {
-              GoRouter.of(context).goNamed('list_transfers',
-                  pathParameters: {'id': '${accounts[index].id}'});
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                  content: Text(
-                      'No tiene saldo suficiente para realizar la transferencia')));
-            }
-          },
+          onTap: () {},
         );
       },
       separatorBuilder: (context, index) => const SizedBox(
@@ -60,7 +55,7 @@ class _TransferListState extends State<TransferList> {
         title: const Text('Transferencias'),
       ),
       body: FutureBuilder(
-          future: getAccounts(),
+          future: getTransfers(),
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
               return const Center(
@@ -71,7 +66,7 @@ class _TransferListState extends State<TransferList> {
               return Center(
                   child: GestureDetector(
                 child: const Text(
-                  'No tiene cuentas registradas',
+                  'No tiene transacciones registradas',
                   style: TextStyle(fontSize: 20),
                 ),
               ));
@@ -79,6 +74,14 @@ class _TransferListState extends State<TransferList> {
               return getListView(snapshot.data ?? []);
             }
           }),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          GoRouter.of(context).goNamed('new_transfer',
+              pathParameters: {'id': '${widget.accountId}'});
+        },
+        tooltip: 'Nueva transaccion',
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }

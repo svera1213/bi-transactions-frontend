@@ -7,8 +7,8 @@ import 'package:http/http.dart' as http;
 
 abstract class AccountRepositoryProtocol {
   Future<List<Account>> fetchAccounts();
-  Future<void> newAccount(String name);
-  Future<void> depositToAccount(int accountId, double value);
+  Future<bool> newAccount(String name);
+  Future<bool> depositToAccount(int accountId, double value);
 }
 
 class AccountRepository extends AccountRepositoryProtocol {
@@ -34,10 +34,11 @@ class AccountRepository extends AccountRepositoryProtocol {
   }
 
   @override
-  Future<void> newAccount(String name) async {
+  Future<bool> newAccount(String name) async {
     var key = await SecureStore.instance.getToken();
     var userId = await SecureStore.instance.getUserId();
-    await http.post(Uri.parse('http://0.0.0.0:8080/api/accounts'),
+    final response = await http.post(
+        Uri.parse('http://0.0.0.0:8080/api/accounts'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           HttpHeaders.authorizationHeader: 'Bearer $key'
@@ -46,17 +47,28 @@ class AccountRepository extends AccountRepositoryProtocol {
           'userNationalId': int.parse(userId),
           'accountName': name
         }));
+    if (response.statusCode == 201) {
+      return true;
+    } else {
+      throw Exception('No se pudieron cargar sus cuentas');
+    }
   }
 
   @override
-  Future<void> depositToAccount(int accountId, double value) async {
+  Future<bool> depositToAccount(int accountId, double value) async {
     var key = await SecureStore.instance.getToken();
-    await http.post(Uri.parse('http://0.0.0.0:8080/api/accounts/deposit'),
+    final response = await http.post(
+        Uri.parse('http://0.0.0.0:8080/api/accounts/deposit'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           HttpHeaders.authorizationHeader: 'Bearer $key'
         },
         body: jsonEncode(
             <String, dynamic>{'accountId': accountId, 'amount': value}));
+    if (response.statusCode == 201) {
+      return true;
+    } else {
+      throw Exception('No se pudieron cargar sus cuentas');
+    }
   }
 }
