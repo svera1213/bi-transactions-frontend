@@ -11,8 +11,14 @@ class SecureStore {
 
   final String tokenKey = 'TOKEN_KEY';
 
+  final String userIdKey = 'USER_ID_KEY';
+
   Future<void> storeToken(String token) {
     return _storage.write(key: tokenKey, value: token);
+  }
+
+  Future<String> getToken() async {
+    return await _storage.read(key: tokenKey) ?? '';
   }
 
   Future<bool> isUserAuthenticated() async {
@@ -21,6 +27,14 @@ class SecureStore {
   }
 
   Future<void> logOut() {
-    return _storage.delete(key: tokenKey);
+    return _storage.deleteAll();
+  }
+
+  Future<void> storeUserId(String id) {
+    return _storage.write(key: userIdKey, value: id);
+  }
+
+  Future<String> getUserId() async {
+    return await _storage.read(key: userIdKey) ?? '';
   }
 }

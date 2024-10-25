@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'dart:io';
 import 'package:bi_transactions_frontend/models/user.dart';
 import 'package:bi_transactions_frontend/repositories/secure_store.dart';
 import 'package:http/http.dart' as http;
@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 abstract class UserRepositoryProtocol {
   Future<bool> login(LoginAccount account);
   Future<bool> signUp(SignUpCredentials credentials);
+  Future<void> getUserNationalId(String email);
 }
 
 class UserRepository extends UserRepositoryProtocol {
@@ -20,8 +21,8 @@ class UserRepository extends UserRepositoryProtocol {
             body: jsonEncode(account.toJson()));
 
     if (response.statusCode == 200) {
-      print(response.body);
       await SecureStore.instance.storeToken(response.body);
+      await getUserNationalId(account.email);
       return true;
     } else {
       throw Exception('Credenciales incorrectas');
@@ -37,11 +38,37 @@ class UserRepository extends UserRepositoryProtocol {
             },
             body: jsonEncode(credentials.toJson()));
     if (response.statusCode == 200) {
-      print(response.body);
       await SecureStore.instance.storeToken(response.body);
+      await SecureStore.instance.storeUserId(credentials.nationalId);
       return true;
     } else {
       throw Exception('No se pudo crear su cuenta');
+    }
+  }
+
+  @override
+  Future<void> getUserNationalId(String email) async {
+    var key = await SecureStore.instance.getToken();
+    final response = await http.get(
+      Uri.parse('http://0.0.0.0:8080/api/users/email/$email'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        HttpHeaders.authorizationHeader: 'Bearer $key'
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
+      var nationalId = switch (json) {
+        {
+          'nationalId': int nationalId,
+        } =>
+          '$nationalId',
+        _ => throw const FormatException('Failed to load album.'),
+      };
+      await SecureStore.instance.storeUserId(nationalId);
+    } else {
+      throw Exception('No se pudo obtener el id del usuario');
     }
   }
 }

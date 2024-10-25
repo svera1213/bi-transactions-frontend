@@ -22,6 +22,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Por favor complete todos los campos')));
+      return;
     }
     _formKey.currentState?.save();
 
@@ -79,6 +80,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               decoration:
                   const InputDecoration(labelText: 'Número de identificación'),
               textInputAction: TextInputAction.next,
+              keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor ingrese su cédula de identidad';

@@ -23,6 +23,7 @@ class _LoginPageState extends State<LoginPage> {
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Por favor ingrese sus credenciales')));
+      return;
     }
     try {
       _formKey.currentState?.save();

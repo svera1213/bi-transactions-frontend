@@ -26,20 +26,6 @@ class _HomeTabBarState extends State<HomeTabBar> {
             BottomNavigationBarItem(
                 icon: Icon(Icons.settings), label: 'Ajustes'),
           ]),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          switch (widget.navigationShell.currentIndex) {
-            case 0:
-              GoRouter.of(context).go('/accounts/new_account');
-            case 1:
-              GoRouter.of(context).go('/tranfers/new_transfer');
-            default:
-              break;
-          }
-        },
-        tooltip: 'Cuenta nueva',
-        child: const Icon(Icons.add),
-      ),
     );
   }
 }

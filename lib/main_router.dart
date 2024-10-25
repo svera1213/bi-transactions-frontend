@@ -47,13 +47,13 @@ final GoRouter mainRouter =
           GoRoute(
               path: '/accounts',
               builder: (context, state) =>
-                  AccountsList(accountsRepo: AccountMockRepository()),
+                  AccountsList(accountsRepo: AccountRepository()),
               routes: <RouteBase>[
                 GoRoute(
                   path: 'new_account',
                   parentNavigatorKey: _rootNavigatorKey,
                   builder: (context, state) => NewAccountPage(
-                    accountsRepo: AccountMockRepository(),
+                    accountsRepo: AccountRepository(),
                   ),
                 )
               ])
@@ -68,7 +68,7 @@ final GoRouter mainRouter =
                   path: 'new_transfer',
                   parentNavigatorKey: _rootNavigatorKey,
                   builder: (context, state) => NewTransferWidget(
-                    accountsRepo: AccountMockRepository(),
+                    accountsRepo: AccountRepository(),
                   ),
                 )
               ])

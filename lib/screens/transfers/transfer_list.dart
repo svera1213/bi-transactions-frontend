@@ -1,6 +1,7 @@
 import 'package:bi_transactions_frontend/models/transfer.dart';
 import 'package:bi_transactions_frontend/repositories/tranfers_repo.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class TransferList extends StatefulWidget {
@@ -59,6 +60,13 @@ class _TransferListState extends State<TransferList> {
                       height: 5,
                     ));
           }),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          GoRouter.of(context).go('/tranfers/new_transfer');
+        },
+        tooltip: 'Nueva transaccion',
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }

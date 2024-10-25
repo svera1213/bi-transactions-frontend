@@ -14,20 +14,24 @@ class NewAccountPage extends StatefulWidget {
 
 class _NewAccountPageState extends State<NewAccountPage> {
   final _formKey = GlobalKey<FormState>();
-  var newAccount = NewAccount();
+
   bool isLoading = false;
 
-  void onSubmit() {
+  double deposit = 0;
+
+  void onSubmit() async {
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Por favor complete todos los campos')));
+      return;
     }
     _formKey.currentState?.save();
 
     setState(() {
       isLoading = true;
     });
-    widget.accountsRepo.newAccount(newAccount.getAccount()).whenComplete(onPop);
+    await widget.accountsRepo.depositToAccount(deposit);
+    onPop();
   }
 
   void onPop() {
@@ -42,50 +46,15 @@ class _NewAccountPageState extends State<NewAccountPage> {
             children: [
               TextFormField(
                 onSaved: (newValue) {
-                  newAccount.name = newValue ?? '';
+                  deposit = double.parse(newValue ?? '0');
                 },
-                decoration:
-                    const InputDecoration(labelText: 'Nombre de la cuenta'),
-                textInputAction: TextInputAction.next,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese el nombre de la cuenta';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              TextFormField(
-                onSaved: (newValue) {
-                  newAccount.accountNumber = newValue ?? '';
-                },
-                decoration:
-                    const InputDecoration(labelText: 'Número de cuenta'),
-                keyboardType: TextInputType.number,
-                textInputAction: TextInputAction.next,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese el número de la cuenta';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              TextFormField(
-                onSaved: (newValue) {
-                  newAccount.balance = double.parse(newValue ?? '0');
-                },
-                decoration: const InputDecoration(labelText: 'Balance actual'),
+                decoration: const InputDecoration(labelText: 'Cantidad'),
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 textInputAction: TextInputAction.done,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese el balance de la cuenta';
+                    return 'Por favor ingrese la cantidad a depositar';
                   }
                   return null;
                 },
@@ -94,7 +63,7 @@ class _NewAccountPageState extends State<NewAccountPage> {
                 height: 40,
               ),
               ElevatedButton(
-                  onPressed: onSubmit, child: const Text('Agregar cuenta')),
+                  onPressed: onSubmit, child: const Text('Depositar')),
             ],
           ),
         ));
@@ -106,7 +75,7 @@ class _NewAccountPageState extends State<NewAccountPage> {
         key: _formKey,
         child: Scaffold(
             appBar: AppBar(
-              title: const Text('Nueva cuenta'),
+              title: const Text('Depositar a la cuenta'),
             ),
             body: SafeArea(
                 child: isLoading

@@ -1,5 +1,3 @@
-import 'package:intl/find_locale.dart';
-
 class LoginAccount {
   final String email;
   final String password;
