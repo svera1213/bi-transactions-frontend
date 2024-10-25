@@ -63,6 +63,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               },
               decoration: const InputDecoration(labelText: 'Usuario'),
               textInputAction: TextInputAction.next,
+              textCapitalization: TextCapitalization.none,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor ingrese su usuario';
@@ -97,6 +98,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               },
               decoration: const InputDecoration(labelText: 'Nombre'),
               textInputAction: TextInputAction.next,
+              textCapitalization: TextCapitalization.words,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor ingrese su nombre';
@@ -113,6 +115,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               },
               decoration: const InputDecoration(labelText: 'Apellido'),
               textInputAction: TextInputAction.next,
+              textCapitalization: TextCapitalization.words,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor ingrese su apellido';
@@ -147,6 +150,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               decoration: const InputDecoration(labelText: 'Email'),
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
+              textCapitalization: TextCapitalization.none,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor ingrese su usuario';
@@ -164,6 +168,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
               textInputAction: TextInputAction.done,
+              textCapitalization: TextCapitalization.none,
               onFieldSubmitted: (_) {
                 onSubmit();
               },

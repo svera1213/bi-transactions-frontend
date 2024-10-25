@@ -77,14 +77,16 @@ final GoRouter mainRouter =
                   TransferList(accountsRepo: AccountRepository()),
               routes: <RouteBase>[
                 GoRoute(
-                    path: '/list_transfers/:id',
+                    path: '/list_transfers/:id/:balance',
                     name: 'list_transfers',
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) {
-                      final id = state.pathParameters['id'] ?? '';
+                      final id = state.pathParameters['id'] ?? '-1';
+                      final balance = state.pathParameters['balance'] ?? '0';
                       return TransfersList(
                         transferRepository: TransferRepository(),
                         accountId: int.parse(id),
+                        balance: double.parse(balance),
                       );
                     }),
                 GoRoute(

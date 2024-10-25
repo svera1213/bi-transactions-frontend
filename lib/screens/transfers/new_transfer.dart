@@ -51,7 +51,12 @@ class _NewTransferWidgetState extends State<NewTransferWidget> {
     });
   }
 
-  void onSubmit() async {
+  void showError(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void onSubmit() {
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Por favor complete todos los campos')));
@@ -63,9 +68,16 @@ class _NewTransferWidgetState extends State<NewTransferWidget> {
       isLoading = true;
     });
 
-    await widget.transferRepository
-        .newTransfer(widget.accountId, toAccount!.id, amount);
-    onPop();
+    widget.transferRepository
+        .newTransfer(widget.accountId, toAccount!.id, amount)
+        .then((_) {
+      onPop();
+    }).catchError((error) {
+      setState(() {
+        isLoading = false;
+      });
+      showError(error.toString());
+    });
   }
 
   void onPop() {

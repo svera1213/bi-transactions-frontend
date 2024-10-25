@@ -20,7 +20,7 @@ class _NewDepositPageState extends State<NewDepositPage> {
 
   double deposit = 0;
 
-  void onSubmit() async {
+  void onSubmit() {
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Por favor complete todos los campos')));
@@ -31,9 +31,21 @@ class _NewDepositPageState extends State<NewDepositPage> {
     setState(() {
       isLoading = true;
     });
-    await widget.accountsRepo
-        .depositToAccount(int.parse(widget.accountId), deposit);
-    onPop();
+    widget.accountsRepo
+        .depositToAccount(int.parse(widget.accountId), deposit)
+        .then((_) {
+      onPop();
+    }).catchError((error) {
+      setState(() {
+        isLoading = false;
+      });
+      showError(error.toString());
+    });
+  }
+
+  void showError(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   void onPop() {

@@ -20,8 +20,7 @@ class _NewAccountWidgetState extends State<NewAccountWidget> {
 
   void onSubmit() {
     if (!_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Por favor complete todos los campos')));
+      showError('Por favor complete todos los campos');
       return;
     }
     _formKey.currentState?.save();
@@ -30,9 +29,19 @@ class _NewAccountWidgetState extends State<NewAccountWidget> {
       isLoading = true;
     });
 
-    widget.accountsRepo.newAccount(accountName).whenComplete(() {
+    widget.accountsRepo.newAccount(accountName).then((_) {
       onPop();
+    }).catchError((error) {
+      showError(error.toString());
+      setState(() {
+        isLoading = false;
+      });
     });
+  }
+
+  void showError(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   void onPop() {
@@ -51,6 +60,7 @@ class _NewAccountWidgetState extends State<NewAccountWidget> {
                 },
                 decoration: const InputDecoration(labelText: 'Nombre cuenta'),
                 textInputAction: TextInputAction.done,
+                textCapitalization: TextCapitalization.sentences,
                 onFieldSubmitted: (_) {
                   onSubmit();
                 },
