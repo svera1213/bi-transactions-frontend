@@ -22,16 +22,6 @@ class _AccountsListState extends State<AccountsList> {
     return widget.accountsRepo.fetchAccounts();
   }
 
-  void createAccount() async {
-    setState(() {
-      isLoading = true;
-    });
-    await widget.accountsRepo.newAccount();
-    setState(() {
-      isLoading = false;
-    });
-  }
-
   Widget getListView(List<Account> accounts) {
     return ListView.separated(
       padding: const EdgeInsets.all(10),
@@ -40,14 +30,14 @@ class _AccountsListState extends State<AccountsList> {
         var account = accounts[index];
         var amount = currencyFormat.format(account.balance);
         return ListTile(
-          title: const Text('Cuenta bancaria'),
-          subtitle: Text('Tipo: ${account.type}'),
+          title: Text(account.accountName),
           trailing: Text(amount),
           tileColor: Colors.blueGrey[300],
           leadingAndTrailingTextStyle:
               const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
           onTap: () {
-            GoRouter.of(context).go('/accounts/new_account');
+            GoRouter.of(context).goNamed('new_deposit',
+                pathParameters: {'id': '${account.id}'});
           },
         );
       },
@@ -72,22 +62,24 @@ class _AccountsListState extends State<AccountsList> {
               );
             }
             if (snapshot.data?.isEmpty ?? true) {
-              return isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : Center(
-                      child: GestureDetector(
-                      onTap: createAccount,
-                      child: const Text(
-                        'Crear cuenta',
-                        style: TextStyle(fontSize: 20),
-                      ),
-                    ));
+              return Center(
+                  child: GestureDetector(
+                child: const Text(
+                  'No tiene cuentas registradas',
+                  style: TextStyle(fontSize: 20),
+                ),
+              ));
             } else {
               return getListView(snapshot.data ?? []);
             }
           }),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          GoRouter.of(context).go('/accounts/new_account');
+        },
+        tooltip: 'Nueva transaccion',
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }

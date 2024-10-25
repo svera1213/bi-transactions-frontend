@@ -4,6 +4,7 @@ import 'package:bi_transactions_frontend/repositories/tranfers_repo.dart';
 import 'package:bi_transactions_frontend/repositories/user_repo.dart';
 import 'package:bi_transactions_frontend/screens/accounts/accounts_list.dart';
 import 'package:bi_transactions_frontend/screens/accounts/new_account.dart';
+import 'package:bi_transactions_frontend/screens/accounts/new_deposit.dart';
 import 'package:bi_transactions_frontend/screens/home/home_tab_bar.dart';
 import 'package:bi_transactions_frontend/screens/login/login_screen.dart';
 import 'package:bi_transactions_frontend/screens/login/sign_up_screen.dart';
@@ -52,10 +53,20 @@ final GoRouter mainRouter =
                 GoRoute(
                   path: 'new_account',
                   parentNavigatorKey: _rootNavigatorKey,
-                  builder: (context, state) => NewAccountPage(
-                    accountsRepo: AccountRepository(),
-                  ),
-                )
+                  builder: (context, state) =>
+                      NewAccountWidget(accountsRepo: AccountRepository()),
+                ),
+                GoRoute(
+                    path: '/new_deposit/:id',
+                    name: 'new_deposit',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (context, state) {
+                      final id = state.pathParameters['id'] ?? '';
+                      return NewDepositPage(
+                        accountsRepo: AccountRepository(),
+                        accountId: id,
+                      );
+                    })
               ])
         ]),
         StatefulShellBranch(routes: <RouteBase>[

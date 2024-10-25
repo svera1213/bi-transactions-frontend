@@ -2,23 +2,25 @@ import 'package:bi_transactions_frontend/repositories/account_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class NewAccountWidget extends StatefulWidget {
-  const NewAccountWidget({super.key, required this.accountsRepo});
+class NewDepositPage extends StatefulWidget {
+  const NewDepositPage(
+      {super.key, required this.accountsRepo, required this.accountId});
 
   final AccountRepositoryProtocol accountsRepo;
+  final String accountId;
 
   @override
-  State<StatefulWidget> createState() => _NewAccountWidgetState();
+  State<StatefulWidget> createState() => _NewDepositPageState();
 }
 
-class _NewAccountWidgetState extends State<NewAccountWidget> {
+class _NewDepositPageState extends State<NewDepositPage> {
   final _formKey = GlobalKey<FormState>();
 
   bool isLoading = false;
 
-  String accountName = '';
+  double deposit = 0;
 
-  void onSubmit() {
+  void onSubmit() async {
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Por favor complete todos los campos')));
@@ -29,10 +31,10 @@ class _NewAccountWidgetState extends State<NewAccountWidget> {
     setState(() {
       isLoading = true;
     });
-
-    widget.accountsRepo.newAccount(accountName).whenComplete(() {
-      onPop();
-    });
+    print('---> ${widget.accountId}');
+    await widget.accountsRepo
+        .depositToAccount(int.parse(widget.accountId), deposit);
+    onPop();
   }
 
   void onPop() {
@@ -47,13 +49,12 @@ class _NewAccountWidgetState extends State<NewAccountWidget> {
             children: [
               TextFormField(
                 onSaved: (newValue) {
-                  accountName = newValue ?? '';
+                  deposit = double.parse(newValue ?? '0');
                 },
-                decoration: const InputDecoration(labelText: 'Nombre cuenta'),
+                decoration: const InputDecoration(labelText: 'Cantidad'),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 textInputAction: TextInputAction.done,
-                onFieldSubmitted: (_) {
-                  onSubmit();
-                },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor ingrese la cantidad a depositar';
@@ -64,7 +65,8 @@ class _NewAccountWidgetState extends State<NewAccountWidget> {
               const SizedBox(
                 height: 40,
               ),
-              ElevatedButton(onPressed: onSubmit, child: const Text('Crear')),
+              ElevatedButton(
+                  onPressed: onSubmit, child: const Text('Depositar')),
             ],
           ),
         ));
@@ -76,7 +78,7 @@ class _NewAccountWidgetState extends State<NewAccountWidget> {
         key: _formKey,
         child: Scaffold(
             appBar: AppBar(
-              title: const Text('Crear una nueva cuenta'),
+              title: const Text('Depositar a la cuenta'),
             ),
             body: SafeArea(
                 child: isLoading

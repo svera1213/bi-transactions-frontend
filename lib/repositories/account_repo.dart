@@ -7,8 +7,8 @@ import 'package:http/http.dart' as http;
 
 abstract class AccountRepositoryProtocol {
   Future<List<Account>> fetchAccounts();
-  Future<void> newAccount();
-  Future<void> depositToAccount(double value);
+  Future<void> newAccount(String name);
+  Future<void> depositToAccount(int accountId, double value);
 }
 
 class AccountRepository extends AccountRepositoryProtocol {
@@ -34,7 +34,7 @@ class AccountRepository extends AccountRepositoryProtocol {
   }
 
   @override
-  Future<void> newAccount() async {
+  Future<void> newAccount(String name) async {
     var key = await SecureStore.instance.getToken();
     var userId = await SecureStore.instance.getUserId();
     await http.post(Uri.parse('http://0.0.0.0:8080/api/accounts'),
@@ -42,14 +42,15 @@ class AccountRepository extends AccountRepositoryProtocol {
           'Content-Type': 'application/json; charset=UTF-8',
           HttpHeaders.authorizationHeader: 'Bearer $key'
         },
-        body: jsonEncode(<String, int>{'userNationalId': int.parse(userId)}));
+        body: jsonEncode(<String, dynamic>{
+          'userNationalId': int.parse(userId),
+          'accountName': name
+        }));
   }
 
   @override
-  Future<void> depositToAccount(double value) async {
+  Future<void> depositToAccount(int accountId, double value) async {
     var key = await SecureStore.instance.getToken();
-    var accounts = await fetchAccounts();
-    var accountId = accounts.first.id;
     await http.post(Uri.parse('http://0.0.0.0:8080/api/accounts/deposit'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
